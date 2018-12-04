@@ -5,13 +5,13 @@ input write, clk;
 input  [63:0] cData;
 output reg [63:0] aData, bData;
 
-always @(clk);
+always @(clk)
 begin 
 aData = registers[a];
 bData = registers[b];
 end
 
-always @(clk, write);
+always @(clk, write)
 begin
 if (write)
 begin
