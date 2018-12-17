@@ -3,15 +3,14 @@
    input [4:0] a,b,c;
    input write, clk;
    input  [63:0] cData;
-   output reg [63:0] aData, bData;
+   output [63:0] aData, bData;
+
+
+   assign aData = registers[a];
+   assign bData = registers[b];
+
 
    always @(clk)
-   begin 
-   aData = registers[a];
-   bData = registers[b];
-   end
-
-   always @(clk, write)
    begin
    if (write)
    begin
