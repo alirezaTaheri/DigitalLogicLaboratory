@@ -11,10 +11,10 @@
 
 
    always @(clk)
-   begin
-   if (write)
-   begin
-   registers[c] = cData;
-   end
-   end
+     begin
+       if (write)
+         begin
+           registers[c] = cData;
+         end
+     end
    endmodule
