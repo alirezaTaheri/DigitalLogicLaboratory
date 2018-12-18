@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 module InstructionMemory(clock, readAddress, instruction);
 
 input clock;
@@ -28,5 +27,4 @@ always @(posedge clock)
    begin
       instruction = instructions[readAddress];
    end
->>>>>>> 9b53df80601313a25b971817cc8ae8a7522a0f00
 endmodule 
