@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 module DataMemory(clock, write, read, readData, writeData, address);
 input clock, read, write;
 input [63:0] address, writeData;

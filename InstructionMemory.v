@@ -14,4 +14,4 @@ instructions[3] = 32'hF80010A6;
 
 instruction = instructions[readAddress];
 end
-endmodule 
+endmodule

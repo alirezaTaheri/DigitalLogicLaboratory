@@ -1,5 +1,5 @@
 module PC_Adder(inputA,inputB,clk,out);
-input [63:0]inputA,b;
+input [63:0]inputA,inputB;
 input clk;
 output reg [63:0]out;
 

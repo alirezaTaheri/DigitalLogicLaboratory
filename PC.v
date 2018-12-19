@@ -11,13 +11,13 @@ always@(posedge clk)
 
    if(reset)
 
-     delay next_pc = 64'b0; 
+     #delay next_pc = 64'b0; 
 
    else
     begin
      if(w)
 
-       delay next_pc = old_pc;
+       #delay next_pc = old_pc;
 
     end
    end
