@@ -1,88 +1,66 @@
 module CPU();
 
-parameter delay = 100;
+wire [63:0]pcIn;
 
-wire [63:0] PC_out;
+wire [63:0]pcOut;
 
-wire [63:0] Adder_1_out;
-wire [63:0] Adder_2_out;
+wire [63:0]usualPc;
 
-wire [63:0] MUX_1_out;
-wire [4:0] MUX_2_out;
-wire [63:0] MUX_3_out;
-wire[63:0] MUX_4_out;
+wire [31:0]instruction;
+wire Reg2Loc,ALUSrc,MemtoReg,RegWrite,MemRead,MemWrite,Branch,ALUOp1,ALUOp0;
 
-wire [31:0] Instr_out;
 
-wire Reg2Loc;
-wire UncondBranch;
-wire Branch;
-wire MemRead;
-wire MemtoReg;
-wire ALUOp;
-wire MemWrite;
-wire ALUSrc;
-wire RegWrite;
+wire [4:0]mux1Out;
 
-wire [63:0] Reg_Read_data_1;
-wire [63:0] Reg_Read_data_2;
+wire [63:0]aData;
+wire [63:0]bData;
 
-wire [63:0]Sign_out;
-wire [63:0]Shift_out;
+wire [63:0]extendedImmediate;
 
-wire ALU_op;
-wire Zero;
-wire ALU_result;
+wire [63:0]relativeBranch;
 
-wire [63:0]Mem_Read_data
+wire [63:0]branchPc;
+
+wire [63:0]mux2Out;
+
+wire [3:0]aluOperation;
+
+wire aluZero;
+wire [63:0]dataMemoryAddress;
+
+wire [63:0]dataMemoryReadData;
+
+wire [63:0]cData;
 
 wire clk;
 
-reg PC_reset;
-reg PC_write;
+reg pcReset;
+initial  
+begin  
+	pcReset=1'b1;
+        #10 pcReset = 1'b0; 
+end 
 
-initial
-begin
-	PC_reset = 1'b1;
-	PC_write = 1'b0;
-end
-
-always
-begin
-	PC_reset = 1'b0;
-	PC_write = 1'b1;
-end
 
 Clock clock(clk);
 
-MUX MUX_1(Adder_1_out,Adder_2_out,Branch & Zero);
+PC pc(pcIn, pcReset, clk,1'b1,  pcOut);
+Adder adder2 (pcOut, 64'd4, usualPc);
+InstructionMemory instrcutionMemory(pcOut, instruction);
 
-PC PC(MUX_1_out,PC_reset,clk,PC_write,PC_out);
+Control control(instruction[31:21], Reg2Loc, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, ALUOp0, ALUOp1);
+MUX mux2to1_1(Reg2Loc,instruction[20:16], instruction[4:0], mux1Out); defparam mux2to1_1.n = 5;
+RegisterBank RegisterBank(instruction[9:5], mux1Out, instruction[4:0], aData, bData, cData, RegWrite, clk);
+SignExtend signExtend(instruction,{ALUOp0, ALUOp1} ,extendedImmediate);
 
-PC_Adder Adder(PC_out,64'd4,Adder_1_out);
+ShiftLeft shiftLeft(extendedImmediate , relativeBranch);
+Adder #(.n(64)) adder (pcOut, relativeBranch, branchPc);
+MUX mux2to1_2(ALUSrc, bData, extendedImmediate, mux2Out);
+ALUControl aluControl({ALUOp0,ALUOp1}, instruction[31:21], aluOperation);
+ALU alu(aData, mux2Out, aluOperation, aluZero, dataMemoryAddress);
 
-InstructionMemory Instruction_memory(PC_out,Instr_out);
-
-Control Control(Instr_out[31:21],Reg2Loc,ALUSrc,MemtoReg,RegWrite,MemRead,MemWrite,Branch,ALUOp1,ALUOp0);
-
-MUX MUX_2(Instr_out[20:16],Instr_out[4:0],Reg2Loc,MUX_2_out);
-
-RegisterBank RegisterBank(Instr_out[9:5],MUX_2_out,Instr_out[4:0],RegWrite,clk,Reg_Read_data_1,Reg_Read_data_2,MUX_4_out);
-
-SignExtend SignExtend(Instr_out,Sign_out);
-
-ShiftLeft_2 ShiftLeft_2(Sign_out,Shift_out);
-
-PC_Adder Adder_2(PC_out,Shift_out,Adder_2_out);
-
-MUX MUX_3(Read_data_2,Sign_out,ALUSrc,MUX_3_out);
-
-ALU_control ALU_control({ALUOp1,ALUOp2},Instr_out[31:21],ALU_op);
-
-ALU ALU(Read_data_1,MUX_3_out,ALU_op,Zero,ALU_Result);
-
-Data_memory(clk,MemWrite,MemRead,Mem_Read_data,Reg_Read_data_2,ALU_Result);
-
-MUX MUX_4(Mem_Read_data,ALU_Result,MemtoReg,MUX_4_out);
+MUX mux2to1_3(Branch & aluZero, usualPc, branchPc, pcIn);
+DataMemory dataMemory(dataMemoryAddress, bData, MemRead, MemWrite, dataMemoryReadData, clk);
+MUX mux2to1_4(MemtoReg, dataMemoryAddress, dataMemoryReadData, cData);
 
 endmodule

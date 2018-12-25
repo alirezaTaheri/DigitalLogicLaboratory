@@ -1,11 +1,12 @@
-module ALU(op, a, b, out, zero);
+module ALU(a,b,op,zero,out);
+parameter delay = 10;
 input [3:0] op;
 input [63:0] a, b;
 output reg [63:0] out;
 output reg zero;
 always @(a, b, op)
 begin
-$display("%d",op);
+#delay
 case(op)
 4'b0000:
  out = a & b;
@@ -32,6 +33,8 @@ endcase
  zero = 0;
 if (out == 0)
  zero = 1;
+$display("\nALU:\nOperation = %b\nA = %b\nB = %b\nOutput = %b\nZero = %b\n ",op, a, b, out, zero);
 end
 
-endmodule
+	
+endmodule 

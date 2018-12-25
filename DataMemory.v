@@ -1,19 +1,29 @@
-module DataMemory(clock, write, read, readData, writeData, address);
-input clock, read, write;
-input [63:0] address, writeData;
-output [63:0] readData;
-reg [63:0] data[0:4];
-always @(posedge clock)
+module DataMemory (Address, WriteData, MemRead, MemWrite, ReadData, clk);
+    input clk;
+input [63:0] Address;
+input [63:0] WriteData;
+input MemRead;
+input MemWrite;
+
+output reg [63:0] ReadData;
+
+reg [63:0] datamemory [31:0]; 
+
+integer i=0;
+initial
 begin
-data[0] = 64'd5;
-data[1] = 64'd5;
-data[2] = 64'd5;
-data[3] = 64'd5;
-data[4] = 64'd5;
-if (write == 1'b1)
-data[address] = writeData;
+    for (i=0; i<32; i=i+1) datamemory[i] = 5;
 end
 
-assign readData = (read == 1'b1 ? data[address] : readData);
+always@(MemRead)
+begin
+    if(MemRead==1)
+	ReadData <= datamemory[Address[4:0]];
+end
+always@(MemWrite)
+begin
+    if(MemWrite==1)
+	datamemory[Address[4:0]] <= WriteData;
+end
 
-endmodule 
+endmodule
